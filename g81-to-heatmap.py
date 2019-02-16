@@ -91,9 +91,15 @@ for x in x_vals:
     plt.plot(x, y, '.', color='k')
 for x in [0, 3, 6]:
   for y in [0, 3, 6]:
-    plt.plot(x_vals[x], y_vals[y], 'o', color='m')
+    if x == 3 and y == 3:
+        marker = 'D'
+        m_color = 'r'
+    else:
+        marker = 'o'
+        m_color = 'b'
+    plt.plot(x_vals[x], y_vals[y], marker, color=m_color)
 
-contour = plt.contourf(x_vals, y_vals[::-1], z_vals, alpha=.75, antialiased=True)
+contour = plt.contourf(x_vals, y_vals[::-1], z_vals, alpha=.90, antialiased=True)
 img = mpimg.imread('Heatbed-MK52.png')
 #img = mpimg.imread('mk52_steel_sheet.png')
 plt.imshow(img, extent=[sheet_left_x, sheet_right_x, sheet_front_y, sheet_back_y], interpolation="lanczos")
