@@ -83,7 +83,7 @@ for col in g81_list_of_lists:
 # Set figure and gca objects, this will let us
 # adjust things about our heatmap image as well
 # as adjust axes label locations.
-fig = plt.figure(dpi=96, figsize=(10, 8.3))
+fig = plt.figure(dpi=96, figsize=(10, 8))
 ax = plt.gca()
 
 for x in x_vals:
@@ -109,7 +109,7 @@ plt.axis('image')
 ax.axes.get_xaxis().set_visible(False)
 ax.axes.get_yaxis().set_visible(False)
 
-plt.colorbar(contour, label="Level (mm) Variance: " + str(round(z_vals.max() - z_vals.min(), 3)))
+plt.colorbar(contour, label="Bed Level (mm) Maximum variance: " + str(round(z_vals.max() - z_vals.min(), 3)))
 
 # Save our graph as an image in the current directory.
 fig.savefig('g81_heatmap.png', bbox_inches="tight")
