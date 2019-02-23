@@ -79,8 +79,8 @@ def addAdjuster(ax,x,y,z):
     z_mcolor = 'g'
     dir = 'cw'    
   plt.plot(x, y, z_marker, color=z_mcolor)
-  plt.text(x, y-10, dist2deg(z), ha="center", va="center",
-    bbox=dict(boxstyle="round", facecolor="white", lw=0.75)
+  plt.text(x, y-9, dist2deg(z), ha="center", va="center",
+    bbox=dict(boxstyle="round", facecolor="white", lw=.75, alpha=.65)
   )  
   arcArrow(ax,15,x,y,dir,z_mcolor)
   
@@ -146,6 +146,7 @@ for x in x_vals:
 # Bolt location Y values inverted
 x_points = [16.7, 0, 0, 125.4, 0, 0, 228.8]
 y_points =  [210.4, 0, 0, 105.6, 0, 0, 0.8]
+y_vals_r = list(reversed(y_vals))
 output_mm_txt = "\nMeasured distances (in mm):"
 output_deg_txt = "\n\nBolt adjustments (in degrees):"
 for y in [0, 3, 6]:
@@ -163,9 +164,38 @@ for y in [0, 3, 6]:
       marker = 'o'
       mcolor = 'b'
       msize = 10
+
+    # Draw marker
     plt.plot(x_vals[x], y_vals[y], marker, color=mcolor, linewidth=1, markersize=msize)
+
+    # Add label for markers
     if z_val:
+      ecolor = "red"
+      box = "larrow"
+      y_off = x_off = 25
+      rot = 45
+      if y == 0:
+        rot = -45
+        y_off = -(y_off)
+      if x == 3:
+        rot = 90
+        x_off = 0
+        y_off = 25
+        if y == 0:
+           y_off = -(y_off)
+           box = "rarrow"
+      if x == 6:
+        box = "rarrow"
+        rot = -(rot)
+        x_off = -(x_off)        
+      if z_val > 0:
+        ecolor = "blue"
+      plt.text(x_vals[x] + x_off, y_vals_r[y] + y_off, str(round(z_val,3)), ha="center", va="center", rotation=rot,
+        bbox=dict(boxstyle=box + ",pad=.4", facecolor="white", lw=2, edgecolor=ecolor, alpha=.60)
+      )      
       addAdjuster(ax, x_points[x], y_points[y], z_val)
+
+# Print results as text to stdout 
 print(output_mm_txt + output_deg_txt)
 
 # Select color theme
