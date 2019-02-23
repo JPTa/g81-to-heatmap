@@ -1,15 +1,3 @@
-import datetime
-import numpy as np
-import re
-import matplotlib
-import matplotlib.image as mpimg
-
-# Tell matplotlib to not worry about DISPLAY
-matplotlib.use('Agg')
-
-# Import pyplot as plt for ease of use
-import matplotlib.pyplot as plt
-
 # This is the raw G81 output from Pronterface,
 # Your regex replace rules below will clean it
 # and make it ready for conversion to a list of
@@ -24,14 +12,78 @@ g81_output_raw = """
   0.13750  0.14009  0.14148  0.14167  0.14065  0.13843  0.1350
  """
 
+import re
+
 # Define your regex rules here depending on how
 # your raw output looks. Ultimately, you want to
 # arrive at several lines of comma separated
 # float values, so split() works well later.
-#g81_output_parsed = re.sub(r"^[ ]+", "", g81_output_raw.strip())
 g81_output_parsed = re.sub(r"\n[ ]+", "\n", g81_output_raw.strip())
-#g81_output_parsed = re.sub(r"[ ]+", ",", g81_output_parsed)
 
+# No need to edit anything below this :)
+#
+import datetime
+import numpy as np
+from numpy import radians as rad
+import matplotlib
+from matplotlib.patches import Arc, RegularPolygon
+import matplotlib.image as mpimg
+
+# Tell matplotlib to not worry about DISPLAY
+matplotlib.use('Agg')
+
+# Import pyplot as plt for ease of use
+import matplotlib.pyplot as plt
+
+# Draw arc arrow
+def arcArrow(ax,radius,centX,centY,direction='ccw',color_='black'):
+    angle_ = 165
+
+    # Line
+    arc = Arc([centX,centY],radius,radius,angle=angle_,
+      theta1=205,capstyle='round',linestyle='-',lw=3,color=color_)
+    ax.add_patch(arc)
+
+    dir = 1
+    if direction == 'cw':
+      dir = -1  
+    
+    # Create the arrow head
+    endX=centX+(radius/2)*dir*np.cos(rad(angle_)) #Do trig to determine end position
+    endY=centY+(radius/2)*np.sin(rad(angle_))
+
+    ax.add_patch(
+      RegularPolygon(
+        (endX, endY),
+         3,                   # triangle
+         radius/5,            # radius
+         dir*rad(360+angle_), # orientation
+         color=color_
+      )
+    )
+    ax.set_xlim([centX-radius,centY+radius]) and ax.set_ylim([centY-radius,centY+radius]) 
+
+# Calculate how many degrees to turn per distance
+def dist2deg(distance):
+    screw_pitch = 0.5
+    return str(int(round(distance / screw_pitch * 360))) + "°"
+
+# Add adjustment points
+def addAdjuster(ax,x,y,z):
+  if z < 0:
+    z_marker = '_'
+    z_mcolor = 'g'
+    dir = 'ccw'
+  elif z > 0:
+    z_marker = '+'
+    z_mcolor = 'r'
+    dir = 'cw'    
+  plt.plot(x, y, z_marker, color=z_mcolor)
+  plt.text(x, y-10, dist2deg(z), ha="center", va="center",
+    bbox=dict(boxstyle="round", facecolor="white", lw=0.75)
+  )  
+  arcArrow(ax,15,x,y,dir,z_mcolor)
+  
 # We're about to convert these strings into floats,
 # this list will hold onto those.
 g81_list_of_lists = []
@@ -47,21 +99,21 @@ row_count = 0
 col_count = 0
 x_size = 250
 y_size = 210
-
+  
 # These values come from mesh_bed_calibration.cpp
 ZERO_REF_X = 2
 ZERO_REF_Y = 9.4
 
-sheet_margin_front = 20
-sheet_margin_back = 12
+sheet_margin_front = 24.5
+sheet_margin_back = 16.5
 sheet_left_x = 0
 sheet_right_x = sheet_left_x + x_size
 sheet_front_y = -(sheet_margin_front)
 sheet_back_y = sheet_front_y + y_size + sheet_margin_front + sheet_margin_back
 
-left_probe_bed_position = 37 - ZERO_REF_X
+left_probe_bed_position = 38.5 - ZERO_REF_X
 front_probe_bed_position = 18.4 - ZERO_REF_Y
-right_probe_bed_position = 245 - ZERO_REF_X
+right_probe_bed_position = 243.5 - ZERO_REF_X
 back_probe_bed_position = 210.4 - ZERO_REF_Y
 
 x_inc = (right_probe_bed_position - left_probe_bed_position) / 6 
@@ -89,20 +141,38 @@ ax = plt.gca()
 for x in x_vals:
   for y in y_vals:
     plt.plot(x, y, '.', color='k')
-for x in [0, 3, 6]:
-  for y in [0, 3, 6]:
-    if x == 3 and y == 3:
-        marker = 'D'
-        m_color = 'r'
-    else:
-        marker = 'o'
-        m_color = 'b'
-    plt.plot(x_vals[x], y_vals[y], marker, color=m_color)
 
-contour = plt.contourf(x_vals, y_vals[::-1], z_vals, alpha=.90, antialiased=True)
+# Show bolt adjustment values
+# Bolt location Y values inverted
+x_points = [16.7, 0, 0, 125.4, 0, 0, 228.8]
+y_points =  [210.4, 0, 0, 105.6, 0, 0, 0.8]
+output_txt = ""
+for y in [0, 3, 6]:
+  print("\n")
+  output_txt = output_txt + "\n"
+  for x in [0, 3, 6]:
+    z_val = round(z_vals[y][x], 3)
+    print("\t" + str(z_val))
+    output_txt = output_txt + "\t" + dist2deg(z_val)
+    if x == 3 and y == 3:
+      marker = '*'
+      mcolor = 'g'
+      msize = 15
+    else:
+      marker = 'o'
+      mcolor = 'b'
+      msize = 10
+    plt.plot(x_vals[x], y_vals[y], marker, color=mcolor, linewidth=1, markersize=msize)
+    if z_val:
+      addAdjuster(ax, x_points[x], y_points[y], z_val)
+
+print(output_txt)
+ 
+cmap_theme = plt.cm.get_cmap("RdBu")
+contour = plt.contourf(x_vals, y_vals[::-1], z_vals, alpha=.90, antialiased=True, cmap=cmap_theme)
 img = mpimg.imread('Heatbed-MK52.png')
 #img = mpimg.imread('mk52_steel_sheet.png')
-plt.imshow(img, extent=[sheet_left_x, sheet_right_x, sheet_front_y, sheet_back_y], interpolation="lanczos")
+plt.imshow(img, extent=[sheet_left_x, sheet_right_x, sheet_front_y, sheet_back_y], interpolation="lanczos", cmap=cmap_theme)
 ax.set_xlim(left=0, right=x_size)
 ax.set_ylim(bottom=0, top=y_size)
 
