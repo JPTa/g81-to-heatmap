@@ -9,7 +9,7 @@ g81_output_raw = """
   0.24667  0.24796  0.24185  0.22833  0.20741  0.17907  0.14333
   0.21315  0.21884  0.21847  0.21204  0.19955  0.18100  0.15639
   0.17676  0.18288  0.18501  0.18315  0.17729  0.16745  0.15361
-  0.13750  0.14009  0.14148  0.14167  0.14065  0.13843  0.1350
+  0.13750  0.14009  0.14148  0.14167  0.14065  0.13843  0.13500
  """
 
 import re
@@ -146,14 +146,15 @@ for x in x_vals:
 # Bolt location Y values inverted
 x_points = [16.7, 0, 0, 125.4, 0, 0, 228.8]
 y_points =  [210.4, 0, 0, 105.6, 0, 0, 0.8]
-output_txt = ""
+output_mm_txt = "\nMeasured distances (in mm):"
+output_deg_txt = "\n\nBolt adjustments (in degrees):"
 for y in [0, 3, 6]:
-  print("\n")
-  output_txt = output_txt + "\n"
+  output_mm_txt = output_mm_txt + "\n"
+  output_deg_txt = output_deg_txt + "\n" 
   for x in [0, 3, 6]:
     z_val = round(z_vals[y][x], 3)
-    print("\t" + str(z_val))
-    output_txt = output_txt + "\t" + dist2deg(z_val)
+    output_mm_txt = output_mm_txt + "\t" + str(z_val) 
+    output_deg_txt = output_deg_txt + "\t" + dist2deg(z_val)
     if x == 3 and y == 3:
       marker = '*'
       mcolor = 'g'
@@ -165,9 +166,9 @@ for y in [0, 3, 6]:
     plt.plot(x_vals[x], y_vals[y], marker, color=mcolor, linewidth=1, markersize=msize)
     if z_val:
       addAdjuster(ax, x_points[x], y_points[y], z_val)
+print(output_mm_txt + output_deg_txt)
 
-print(output_txt)
- 
+# Select color theme
 cmap_theme = plt.cm.get_cmap("RdBu")
 contour = plt.contourf(x_vals, y_vals[::-1], z_vals, alpha=.90, antialiased=True, cmap=cmap_theme)
 img = mpimg.imread('Heatbed-MK52.png')
