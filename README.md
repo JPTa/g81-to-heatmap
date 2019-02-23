@@ -22,7 +22,7 @@ This script will convert that output into something like this:
 
 ![G81 Heatmap](g81_heatmap.png "G81 Heatmap Example")
 
-Above heatmap shows which bolt to turn, what direction and how many degrees.
+Above heatmap shows which bolt to turn, what direction and how many degrees. All displayed distances are relative to the center point (green star).
 
 ## Usage
 ### Prerequisites
