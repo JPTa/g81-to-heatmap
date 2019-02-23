@@ -1,6 +1,6 @@
 # g81-to-heatmap
 
-https://github.com/PrusaOwners/prusaowners/wiki/Bed_Leveling_without_Wave_Springs
+See also: https://github.com/PrusaOwners/prusaowners/wiki/Bed_Leveling_without_Wave_Springs
 
 ## OctoPrint Plugin
 OctoPrint user? Check out [OctoPrint-PrusaMeshMap](https://github.com/ff8jake/OctoPrint-PrusaMeshMap)!
