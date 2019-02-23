@@ -72,11 +72,11 @@ def dist2deg(distance):
 def addAdjuster(ax,x,y,z):
   if z < 0:
     z_marker = '_'
-    z_mcolor = 'g'
+    z_mcolor = 'r'
     dir = 'ccw'
   elif z > 0:
     z_marker = '+'
-    z_mcolor = 'r'
+    z_mcolor = 'g'
     dir = 'cw'    
   plt.plot(x, y, z_marker, color=z_mcolor)
   plt.text(x, y-10, dist2deg(z), ha="center", va="center",
